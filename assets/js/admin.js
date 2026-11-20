@@ -345,26 +345,26 @@
 
   function cjRows(products) {
     if (!products.length) {
-      return '<tr><td colspan="7" class="empty">CJ returned no products for that keyword.</td></tr>';
+      return '<tr><td colspan="5" class="empty">CJ returned no products for that keyword.</td></tr>';
     }
     return products.map(function (item) {
       var image = safeImageUrl(item.image);
       var imageCell = image
         ? '<img src="' + esc(image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" ' +
-          'style="width:56px;height:56px;object-fit:cover;border-radius:6px;display:block">'
+          'style="width:48px;height:48px;object-fit:cover;border-radius:6px;display:block">'
         : '<span class="muted">No image</span>';
 
       return "<tr>" +
         "<td>" + imageCell + "</td>" +
-        "<td><b>" + esc(item.name || "Untitled") + "</b>" +
+        '<td style="min-width:240px"><b>' + esc(item.name || "Untitled") + "</b>" +
+          "<small>SKU " + esc(item.sku || "—") + "</small>" +
+          '<small style="word-break:break-all">ID <code>' + esc(item.cj_product_id || "—") + "</code></small>" +
           (item.category_name ? "<small>" + esc(item.category_name) + "</small>" : "") +
-          (item.already_in_my_cj ? '<small>In your CJ list</small>' : "") + "</td>" +
-        "<td>" + esc(item.sku || "—") + "</td>" +
-        "<td><code>" + esc(item.cj_product_id || "—") + "</code></td>" +
-        '<td class="num">' + cjPrice(item.supplier_price_usd) +
+          (item.already_in_my_cj ? "<small>In your CJ list</small>" : "") + "</td>" +
+        '<td class="num" style="white-space:nowrap">' + cjPrice(item.supplier_price_usd) +
           (item.original_price_usd && item.original_price_usd !== item.supplier_price_usd
             ? "<small>list " + cjPrice(item.original_price_usd) + "</small>" : "") + "</td>" +
-        '<td class="num">' + cjCount(item.stock) +
+        '<td class="num" style="white-space:nowrap">' + cjCount(item.stock) +
           "<small>verified " + cjCount(item.verified_inventory) + "</small></td>" +
         '<td class="num"><button class="btn btn--ghost btn--sm" type="button" data-action="cj-import-open" data-id="' +
           esc(item.cj_product_id || "") + '"' + (item.cj_product_id ? "" : " disabled") + ">Import</button></td>" +
@@ -417,8 +417,8 @@
           '<p class="muted" style="font-size:.82rem">Showing ' + products.length +
             (Number.isFinite(total) && total > products.length ? " of " + total.toLocaleString("en-US") : "") +
             " result" + (products.length === 1 ? "" : "s") + " for “" + esc(keyword) + "”.</p>" +
-          '<div class="scroll"><table><thead><tr><th></th><th>Product</th><th>CJ SKU</th>' +
-            '<th>CJ product ID</th><th class="num">Supplier price</th><th class="num">Stock</th><th></th></tr></thead>' +
+          '<div class="scroll"><table><thead><tr><th></th><th>Product</th>' +
+            '<th class="num">Price</th><th class="num">Stock</th><th></th></tr></thead>' +
             "<tbody>" + cjRows(products) + "</tbody></table></div>";
       } catch (error) {
         if (seq !== cjSeq) return;
