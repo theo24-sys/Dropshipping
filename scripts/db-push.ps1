@@ -38,7 +38,12 @@ function Expand-Packages {
 
 # Npgsql 3.2.7 is a single net45 assembly with no external dependencies,
 # which is what actually loads inside Windows PowerShell 5.1.
-$LOAD_ORDER = @('Npgsql')
+$LOAD_ORDER = @(
+    'System.Runtime.CompilerServices.Unsafe',
+    'System.Threading.Tasks.Extensions',
+    'System.ValueTuple',
+    'Npgsql'
+)
 
 function Import-Npgsql {
     $bin = Join-Path $nuget 'bin'
@@ -57,13 +62,23 @@ function Import-Npgsql {
         Copy-Item $found.FullName (Join-Path $bin "$name.dll") -Force
     }
 
+    $script:binPath = $bin
+    [AppDomain]::CurrentDomain.add_AssemblyResolve({
+        param($sender, $eventArgs)
+        if (-not $eventArgs -or -not $eventArgs.Name) { return $null }
+        $asmName = ($eventArgs.Name -split ',')[0].Trim()
+        $candidate = Join-Path $script:binPath "$asmName.dll"
+        if (Test-Path -LiteralPath $candidate) { return [Reflection.Assembly]::LoadFrom($candidate) }
+        return $null
+    })
+
     foreach ($name in $LOAD_ORDER) {
         $path = Join-Path $bin "$name.dll"
         if (-not (Test-Path $path)) { continue }
         try {
             Add-Type -Path $path -ErrorAction Stop
         } catch {
-            if ($_.Exception.Message -notmatch 'already loaded|Assembly with same name') {
+            if ($_.Exception.Message -notmatch 'already loaded|Assembly with same name|Unable to load one or more') {
                 Write-Warning "load $name failed: $($_.Exception.Message)"
             }
         }
