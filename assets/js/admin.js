@@ -355,7 +355,7 @@
         '<td class="num">' + money(order.total_usd) + "</td>" +
         "<td>" + shortDate(order.placed_at) + "</td>" +
         '<td class="num"><button class="btn btn--ghost btn--sm" data-action="open-order" data-id="' +
-          order.id + '">Open</button></td></tr>";
+          order.id + '">Open</button></td></tr>';
     }).join("");
   }
 
