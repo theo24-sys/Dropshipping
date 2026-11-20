@@ -1,7 +1,7 @@
 {
   "name": "morggy-storefront",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MORGGY storefront — static HTML/CSS/JS, deployed to Cloudflare Workers",
   "scripts": {
     "build": "node scripts/build.mjs",
