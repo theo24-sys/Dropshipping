@@ -117,7 +117,7 @@ window.MORGGY = {
 
     // Paste your Supabase sb_publishable_ key below.
     // Never put a service-role or secret key here.
-    anonKey: "PASTE_YOUR_SUPABASE_PUBLISHABLE_KEY_HERE"
+    anonKey: "sb_publishable_3nJDPpbzUKUdBHk-rFLycw_og5InCFk"
   },
 
   payments: {
