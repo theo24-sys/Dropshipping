@@ -5,6 +5,7 @@ Thumbs.db
 node_modules/
 .wrangler/
 .serve.ps1
+.tools/
 
 # Supabase local state
 supabase/.temp/

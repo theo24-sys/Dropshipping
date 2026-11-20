@@ -145,7 +145,7 @@
     var head = $("#site-header");
     if (head) {
       head.innerHTML =
-        '<div class="announce">Tracked delivery to <b>Singapore</b> &amp; <b>Malaysia</b> &middot; 5–10 working days</div>' +
+        '<div class="announce">Delivery to <b>Singapore</b> &amp; <b>Malaysia</b> &middot; Estimated 5–10 working days</div>' +
         '<header class="site-head"><div class="container head-inner">' +
           '<button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">' + I.menu + "</button>" +
           '<a class="brand" href="index.html"><b>MORGGY</b><span>' + esc(C.brand.tagline) + "</span></a>" +
@@ -249,10 +249,10 @@
         var m = C.markets[k];
         if (m.status !== "live") return "";
         return '<div class="market-card"><h3>' + esc(m.name) + " <span>" + esc(m.currency) + "</span></h3>" +
-          "<dl><dt>Delivery</dt><dd>" + m.shipping.eta[0] + "–" + m.shipping.eta[1] + " working days</dd>" +
-          "<dt>Shipping</dt><dd>" + m.symbol + m.shipping.flat.toFixed(2) + " first item</dd>" +
+          "<dl><dt>Est. delivery</dt><dd>" + m.shipping.eta[0] + "–" + m.shipping.eta[1] + " working days</dd>" +
+          "<dt>Est. shipping</dt><dd>" + m.symbol + m.shipping.flat.toFixed(2) + " first item (indicative rate)</dd>" +
           "<dt>Additional item</dt><dd>" + m.symbol + m.shipping.perAdditionalItem.toFixed(2) + "</dd>" +
-          "<dt>Carrier</dt><dd>Tracked parcel</dd></dl>" +
+          "<dt>Carrier</dt><dd>International parcel (tracking provided when issued)</dd></dl>" +
           "<p>" + esc(m.taxNote) + "</p></div>";
       }).join("");
     }
@@ -350,10 +350,10 @@
           '<span id="pdpQty">' + ui.qty + '</span><button data-qd="1" aria-label="Increase quantity">+</button></div>' +
           '<button class="btn btn--gold" id="pdpAdd">Add to cart</button></div>' +
         '<div class="pdp-notes">' +
-          "<div>" + I.truck + "<span>Delivery to " + esc(mkt().name) + ": " + esc(etaText(p)) +
-            (ship != null ? " &middot; shipping " + localPrice(ship) + " first item" : "") + "</span></div>" +
-          "<div>" + I.shield + "<span>Supplier stock and dispatch are confirmed before your order is accepted.</span></div>" +
-          "<div>" + I.globe + "<span>Imported from a vetted overseas supplier. Import taxes, if any, are payable on delivery.</span></div>" +
+          "<div>" + I.truck + "<span>Estimated delivery to " + esc(mkt().name) + ": " + esc(etaText(p)) +
+            (ship != null ? " &middot; est. shipping " + localPrice(ship) + " first item" : "") + "</span></div>" +
+          "<div>" + I.shield + "<span>Supplier stock is confirmed upon order placement; full refund if unavailable.</span></div>" +
+          "<div>" + I.globe + "<span>Imported from an overseas supplier. Import taxes, if any, are payable on delivery.</span></div>" +
         "</div>" +
       "</div>";
 
