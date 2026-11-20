@@ -17,7 +17,7 @@
   var db = null;
   var me = null;
   var state = { products: [], categories: [], suppliers: [], mappings: [] };
-  var cjSeq = 0; /* invalidates in-flight CJ searches when the modal closes or a newer search starts */
+  var cjSeq = 0; /* invalidates in-flight CJ requests when the modal closes or a newer one starts */
 
   var esc = function (value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
@@ -338,7 +338,7 @@
 
   function cjRows(products) {
     if (!products.length) {
-      return '<tr><td colspan="6" class="empty">CJ returned no products for that keyword.</td></tr>';
+      return '<tr><td colspan="7" class="empty">CJ returned no products for that keyword.</td></tr>';
     }
     return products.map(function (item) {
       var image = safeImageUrl(item.image);
@@ -359,6 +359,8 @@
             ? "<small>list " + cjPrice(item.original_price_usd) + "</small>" : "") + "</td>" +
         '<td class="num">' + cjCount(item.stock) +
           "<small>verified " + cjCount(item.verified_inventory) + "</small></td>" +
+        '<td class="num"><button class="btn btn--ghost btn--sm" type="button" data-action="cj-import-open" data-id="' +
+          esc(item.cj_product_id || "") + '"' + (item.cj_product_id ? "" : " disabled") + ">Import</button></td>" +
       "</tr>";
     }).join("");
   }
@@ -366,13 +368,16 @@
   function openCjSearch() {
     cjSeq += 1;
     openModal("Search CJ products",
-      '<form id="cjForm">' +
-        '<div class="field"><label for="cj-keyword">Product keyword</label>' +
-        '<div class="row"><input id="cj-keyword" maxlength="200" autocomplete="off" placeholder="e.g. phone stand" required>' +
-        '<button class="btn" type="submit" id="cjSubmit">Search CJ</button></div></div>' +
-      "</form>" +
-      '<p class="muted" style="font-size:.78rem">Each search uses CJ API quota, so it only runs when you press Search.</p>' +
-      '<div id="cjResults"></div>');
+      '<div id="cjMain">' +
+        '<form id="cjForm">' +
+          '<div class="field"><label for="cj-keyword">Product keyword</label>' +
+          '<div class="row"><input id="cj-keyword" maxlength="200" autocomplete="off" placeholder="e.g. phone stand" required>' +
+          '<button class="btn" type="submit" id="cjSubmit">Search CJ</button></div></div>' +
+        "</form>" +
+        '<p class="muted" style="font-size:.78rem">Each search uses CJ API quota, so it only runs when you press Search.</p>' +
+        '<div id="cjResults"></div>' +
+      "</div>" +
+      '<div id="cjDetail" style="display:none"></div>');
 
     var form = document.getElementById("cjForm");
     var input = document.getElementById("cj-keyword");
@@ -406,7 +411,7 @@
             (Number.isFinite(total) && total > products.length ? " of " + total.toLocaleString("en-US") : "") +
             " result" + (products.length === 1 ? "" : "s") + " for “" + esc(keyword) + "”.</p>" +
           '<div class="scroll"><table><thead><tr><th></th><th>Product</th><th>CJ SKU</th>' +
-            '<th>CJ product ID</th><th class="num">Supplier price</th><th class="num">Stock</th></tr></thead>' +
+            '<th>CJ product ID</th><th class="num">Supplier price</th><th class="num">Stock</th><th></th></tr></thead>' +
             "<tbody>" + cjRows(products) + "</tbody></table></div>";
       } catch (error) {
         if (seq !== cjSeq) return;
@@ -416,6 +421,138 @@
         if (seq === cjSeq) submit.disabled = false;
       }
     };
+  }
+
+  /* Shows one CJ product's detail and variants, and imports it as an unverified draft. */
+  async function openCjDetail(pid) {
+    var main = document.getElementById("cjMain");
+    var panel = document.getElementById("cjDetail");
+    if (!main || !panel || !pid) return;
+
+    cjSeq += 1;
+    var seq = cjSeq;
+    main.style.display = "none";
+    panel.style.display = "";
+    panel.innerHTML = '<div class="empty">Loading product from CJ…</div>';
+
+    function back() {
+      cjSeq += 1;
+      panel.style.display = "none";
+      panel.innerHTML = "";
+      main.style.display = "";
+    }
+
+    try {
+      var data = await invoke("cj-import", { action: "detail", pid: pid });
+      if (seq !== cjSeq) return;
+      if (!data || data.success === false || !data.product) {
+        throw new Error((data && data.message) || "CJ did not return this product.");
+      }
+
+      var p = data.product;
+      var image = safeImageUrl(p.image);
+      var variants = Array.isArray(p.variants) ? p.variants : [];
+      var shown = variants.slice(0, 15);
+      var costText = p.cost_min == null
+        ? "—"
+        : (p.cost_max != null && p.cost_max !== p.cost_min
+            ? cjPrice(p.cost_min) + " – " + cjPrice(p.cost_max)
+            : cjPrice(p.cost_min));
+      var placeholder = p.cost_min ? (Math.ceil(p.cost_min * 3 * 100) / 100).toFixed(2) : "";
+      var descriptionText = String(p.description || "");
+
+      panel.innerHTML =
+        '<button class="btn btn--ghost btn--sm" type="button" id="cjBack">← Back to results</button>' +
+        '<div class="row" style="margin-top:12px;align-items:flex-start">' +
+          (image
+            ? '<img src="' + esc(image) + '" alt="" referrerpolicy="no-referrer" ' +
+              'style="width:96px;height:96px;object-fit:cover;border-radius:8px">'
+            : "") +
+          "<div><b>" + esc(p.name || "Untitled") + "</b>" +
+            "<small>CJ SKU " + esc(p.sku || "—") + "</small>" +
+            "<small>CJ product ID <code>" + esc(p.cj_product_id || pid) + "</code></small>" +
+            "<small>Supplier cost " + esc(costText) + " · " + variants.length + " variant" +
+              (variants.length === 1 ? "" : "s") + "</small></div>" +
+        "</div>" +
+
+        (variants.length
+          ? '<h3 style="margin:16px 0 8px;font-size:1rem">Variants</h3>' +
+            '<div class="scroll"><table><thead><tr><th>Variant</th><th>SKU</th>' +
+            '<th class="num">Cost</th><th class="num">Weight</th></tr></thead><tbody>' +
+            shown.map(function (v) {
+              return "<tr><td>" + esc(v.name || v.key || "—") + "</td><td>" + esc(v.sku || "—") + "</td>" +
+                '<td class="num">' + cjPrice(v.price_usd) + "</td>" +
+                '<td class="num">' + (v.weight_g == null ? "—" : esc(v.weight_g) + " g") + "</td></tr>";
+            }).join("") + "</tbody></table></div>" +
+            (variants.length > shown.length
+              ? '<p class="muted" style="font-size:.78rem">+ ' + (variants.length - shown.length) + " more variants not shown.</p>"
+              : "")
+          : '<p class="muted" style="font-size:.84rem">CJ returned no variant list for this product.</p>') +
+
+        (descriptionText
+          ? '<h3 style="margin:16px 0 8px;font-size:1rem">Description</h3>' +
+            '<p class="muted" style="font-size:.82rem;white-space:pre-line">' +
+            esc(descriptionText.slice(0, 600)) + (descriptionText.length > 600 ? "…" : "") + "</p>"
+          : "") +
+
+        '<h3 style="margin:16px 0 8px;font-size:1rem">Import as draft</h3>' +
+        '<form id="cjImportForm">' +
+          '<div class="row"><div class="field"><label for="cj-cat">Category</label><select id="cj-cat">' +
+            '<option value="">No category</option>' +
+            state.categories.map(function (category) {
+              return '<option value="' + esc(category.id) + '">' + esc(category.name) + "</option>";
+            }).join("") + "</select></div>" +
+          '<div class="field"><label for="cj-price">Retail price USD</label>' +
+            '<input id="cj-price" type="number" step="0.01" min="0.01" required value="' + esc(placeholder) + '"></div></div>' +
+          '<p class="muted" style="font-size:.78rem">The price shown is a placeholder (3× the lowest CJ cost) and does not include shipping. ' +
+            "Set the real price after you have a landed-cost figure. The product is saved as an unverified draft and is not visible on the storefront until you verify and publish it.</p>" +
+          '<button class="btn" type="submit" id="cjImportSubmit">Import as draft</button>' +
+        "</form>";
+
+      document.getElementById("cjBack").onclick = back;
+
+      document.getElementById("cjImportForm").onsubmit = async function (event) {
+        event.preventDefault();
+        var submit = document.getElementById("cjImportSubmit");
+        var price = Number(document.getElementById("cj-price").value);
+        var categoryId = document.getElementById("cj-cat").value || null;
+        if (!Number.isFinite(price) || price <= 0) { flash("Enter a valid retail price.", "bad"); return; }
+
+        submit.disabled = true;
+        cjSeq += 1;
+        var importSeq = cjSeq;
+
+        try {
+          var result = await invoke("cj-import", {
+            action: "import", pid: pid, categoryId: categoryId, priceUsd: price
+          });
+          if (!result || result.success === false) {
+            throw new Error((result && result.message) || "Import failed.");
+          }
+          flash("Imported as a draft: " + (result.product ? result.product.name : "product") + ".");
+          renderProducts();
+          if (importSeq === cjSeq) {
+            panel.innerHTML =
+              '<div class="notice"><strong>Imported as a draft.</strong> ' + esc(result.product ? result.product.name : "") +
+                "<br>It is unverified and has the mapping status needs review. Close this window, then use Edit, Map and Verify on the product row.</div>" +
+              '<button class="btn btn--ghost btn--sm" type="button" id="cjBack2">← Back to results</button>';
+            document.getElementById("cjBack2").onclick = back;
+          }
+        } catch (error) {
+          if (importSeq === cjSeq) {
+            flash(error.message || "Import failed.", "bad");
+            submit.disabled = false;
+          }
+        }
+      };
+    } catch (error) {
+      if (seq !== cjSeq) return;
+      panel.innerHTML =
+        '<button class="btn btn--ghost btn--sm" type="button" id="cjBack3">← Back to results</button>' +
+        '<div class="notice notice--bad" style="margin-top:12px"><strong>Could not load this product.</strong> ' +
+          esc(error.message || "Unknown error") + "</div>";
+      document.getElementById("cjBack3").onclick = back;
+    }
   }
 
   /* ---------------------------------------------------------------- orders */
@@ -722,6 +859,11 @@
 
     if (action === "cj-search") {
       openCjSearch();
+      return;
+    }
+
+    if (action === "cj-import-open") {
+      openCjDetail(id);
       return;
     }
 
