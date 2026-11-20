@@ -17,6 +17,13 @@
   var db = null;
   var me = null;
   var state = { products: [], categories: [], suppliers: [], mappings: [] };
+  /* Imports are limited to these store categories (must match the slugs in the cj-import function). */
+  var STORE_CATEGORY_SLUGS = [
+    "home-kitchen-office",
+    "beauty-skincare",
+    "tech-smart-accessories",
+    "eco-friendly-custom"
+  ];
   var cjSeq = 0; /* invalidates in-flight CJ requests when the modal closes or a newer one starts */
 
   var esc = function (value) {
@@ -460,6 +467,9 @@
             : cjPrice(p.cost_min));
       var placeholder = p.cost_min ? (Math.ceil(p.cost_min * 3 * 100) / 100).toFixed(2) : "";
       var descriptionText = String(p.description || "");
+      var allowedCategories = state.categories.filter(function (category) {
+        return STORE_CATEGORY_SLUGS.indexOf(category.slug) > -1;
+      });
 
       panel.innerHTML =
         '<button class="btn btn--ghost btn--sm" type="button" id="cjBack">← Back to results</button>' +
@@ -496,10 +506,12 @@
           : "") +
 
         '<h3 style="margin:16px 0 8px;font-size:1rem">Import as draft</h3>' +
+        (allowedCategories.length ? "" :
+          '<div class="notice notice--bad">The four store categories are not in the database yet, so nothing can be imported. Run the category SQL first.</div>') +
         '<form id="cjImportForm">' +
-          '<div class="row"><div class="field"><label for="cj-cat">Category</label><select id="cj-cat">' +
-            '<option value="">No category</option>' +
-            state.categories.map(function (category) {
+          '<div class="row"><div class="field"><label for="cj-cat">Store category</label><select id="cj-cat" required>' +
+            '<option value="">Choose a category</option>' +
+            allowedCategories.map(function (category) {
               return '<option value="' + esc(category.id) + '">' + esc(category.name) + "</option>";
             }).join("") + "</select></div>" +
           '<div class="field"><label for="cj-price">Retail price USD</label>' +
@@ -516,6 +528,7 @@
         var submit = document.getElementById("cjImportSubmit");
         var price = Number(document.getElementById("cj-price").value);
         var categoryId = document.getElementById("cj-cat").value || null;
+        if (!categoryId) { flash("Choose one of the store categories.", "bad"); return; }
         if (!Number.isFinite(price) || price <= 0) { flash("Enter a valid retail price.", "bad"); return; }
 
         submit.disabled = true;
