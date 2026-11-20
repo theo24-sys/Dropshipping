@@ -17,6 +17,7 @@
   var db = null;
   var me = null;
   var state = { products: [], categories: [], suppliers: [], mappings: [] };
+  var cjSeq = 0; /* invalidates in-flight CJ searches when the modal closes or a newer search starts */
 
   var esc = function (value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, function (c) {
@@ -244,6 +245,7 @@
   /* -------------------------------------------------------------- products */
   async function renderProducts() {
     setHead("Products & stock", "Verify data, map supplier items and watch stock. Cost and margin are staff-only.",
+      '<button class="btn btn--ghost" type="button" data-action="cj-search">Search CJ products</button> ' +
       '<button class="btn btn--gold" type="button" data-action="new-product">New product</button>');
     loading();
 
@@ -311,6 +313,109 @@
           '<button class="btn btn--ghost btn--sm" data-action="sync-stock" data-id="' + product.id + '">Sync</button>' +
         "</td></tr>";
     }).join("");
+  }
+
+  /* ------------------------------------------------------- CJ catalogue search */
+  /* Only https image URLs are rendered; anything else is dropped. */
+  function safeImageUrl(url) {
+    try {
+      var parsed = new URL(String(url || ""));
+      return parsed.protocol === "https:" ? parsed.href : "";
+    } catch (err) {
+      return "";
+    }
+  }
+
+  function cjPrice(value) {
+    var number = Number(value);
+    return value != null && Number.isFinite(number) && number > 0 ? money(number) : "—";
+  }
+
+  function cjCount(value) {
+    var number = Number(value);
+    return value != null && Number.isFinite(number) ? number.toLocaleString("en-US") : "—";
+  }
+
+  function cjRows(products) {
+    if (!products.length) {
+      return '<tr><td colspan="6" class="empty">CJ returned no products for that keyword.</td></tr>';
+    }
+    return products.map(function (item) {
+      var image = safeImageUrl(item.image);
+      var imageCell = image
+        ? '<img src="' + esc(image) + '" alt="" loading="lazy" referrerpolicy="no-referrer" ' +
+          'style="width:56px;height:56px;object-fit:cover;border-radius:6px;display:block">'
+        : '<span class="muted">No image</span>';
+
+      return "<tr>" +
+        "<td>" + imageCell + "</td>" +
+        "<td><b>" + esc(item.name || "Untitled") + "</b>" +
+          (item.category_name ? "<small>" + esc(item.category_name) + "</small>" : "") +
+          (item.already_in_my_cj ? '<small>In your CJ list</small>' : "") + "</td>" +
+        "<td>" + esc(item.sku || "—") + "</td>" +
+        "<td><code>" + esc(item.cj_product_id || "—") + "</code></td>" +
+        '<td class="num">' + cjPrice(item.supplier_price_usd) +
+          (item.original_price_usd && item.original_price_usd !== item.supplier_price_usd
+            ? "<small>list " + cjPrice(item.original_price_usd) + "</small>" : "") + "</td>" +
+        '<td class="num">' + cjCount(item.stock) +
+          "<small>verified " + cjCount(item.verified_inventory) + "</small></td>" +
+      "</tr>";
+    }).join("");
+  }
+
+  function openCjSearch() {
+    cjSeq += 1;
+    openModal("Search CJ products",
+      '<form id="cjForm">' +
+        '<div class="field"><label for="cj-keyword">Product keyword</label>' +
+        '<div class="row"><input id="cj-keyword" maxlength="200" autocomplete="off" placeholder="e.g. phone stand" required>' +
+        '<button class="btn" type="submit" id="cjSubmit">Search CJ</button></div></div>' +
+      "</form>" +
+      '<p class="muted" style="font-size:.78rem">Each search uses CJ API quota, so it only runs when you press Search.</p>' +
+      '<div id="cjResults"></div>');
+
+    var form = document.getElementById("cjForm");
+    var input = document.getElementById("cj-keyword");
+    var submit = document.getElementById("cjSubmit");
+    var results = document.getElementById("cjResults");
+    if (input) input.focus();
+
+    form.onsubmit = async function (event) {
+      event.preventDefault();
+      var keyword = input.value.trim();
+      if (!keyword) {
+        results.innerHTML = '<div class="notice notice--bad">Enter a keyword to search.</div>';
+        return;
+      }
+
+      cjSeq += 1;
+      var seq = cjSeq;
+      submit.disabled = true;
+      results.innerHTML = '<div class="empty">Searching CJ…</div>';
+
+      try {
+        var data = await invoke("cj-search", { keyword: keyword, page: 1, size: 20 });
+        if (seq !== cjSeq) return;
+        if (!data || data.success === false) {
+          throw new Error((data && data.message) || "CJ search failed.");
+        }
+        var products = Array.isArray(data.products) ? data.products : [];
+        var total = Number(data.totalRecords);
+        results.innerHTML =
+          '<p class="muted" style="font-size:.82rem">Showing ' + products.length +
+            (Number.isFinite(total) && total > products.length ? " of " + total.toLocaleString("en-US") : "") +
+            " result" + (products.length === 1 ? "" : "s") + " for “" + esc(keyword) + "”.</p>" +
+          '<div class="scroll"><table><thead><tr><th></th><th>Product</th><th>CJ SKU</th>' +
+            '<th>CJ product ID</th><th class="num">Supplier price</th><th class="num">Stock</th></tr></thead>' +
+            "<tbody>" + cjRows(products) + "</tbody></table></div>";
+      } catch (error) {
+        if (seq !== cjSeq) return;
+        results.innerHTML = '<div class="notice notice--bad"><strong>CJ search failed.</strong> ' +
+          esc(error.message || "Unknown error") + "</div>";
+      } finally {
+        if (seq === cjSeq) submit.disabled = false;
+      }
+    };
   }
 
   /* ---------------------------------------------------------------- orders */
@@ -570,6 +675,7 @@
   }
 
   function closeModal() {
+    cjSeq += 1; /* drop any CJ search still in flight */
     modal.classList.remove("is-on");
     modalBody.innerHTML = "";
   }
@@ -593,7 +699,7 @@
     });
     var payload = {};
     try { payload = await response.json(); } catch (err) { payload = {}; }
-    if (!response.ok) throw new Error(payload.error || "That request failed.");
+    if (!response.ok) throw new Error(payload.error || payload.message || "That request failed.");
     return payload;
   }
 
@@ -611,6 +717,11 @@
 
     if (action === "new-product") {
       openProductForm(null);
+      return;
+    }
+
+    if (action === "cj-search") {
+      openCjSearch();
       return;
     }
 
