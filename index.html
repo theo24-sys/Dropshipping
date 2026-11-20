@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MORGGY | Discover more. Live better.</title>
+<meta name="description" content="MORGGY is an international online store for considered everyday essentials — home, desk, travel and lifestyle. Tracked delivery to Singapore and Malaysia.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23102B25'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23D6A85F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-page="home">
+<div id="site-header"></div>
+
+<main>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">International store · Singapore &amp; Malaysia</p>
+        <h1>Considered essentials for <em>everyday living</em>.</h1>
+        <p class="hero-lead">A small, tightly edited range of home, desk, travel and lifestyle goods — sourced from vetted overseas suppliers and delivered to your door with tracking.</p>
+        <div class="hero-actions">
+          <a class="btn btn--dark" href="shop.html">Shop the collection</a>
+          <a class="btn btn--ghost" href="categories.html">Browse categories</a>
+        </div>
+        <div class="hero-meta">
+          <span>Tracked delivery, 5–10 working days</span>
+          <span>Prices in S$ and RM</span>
+          <span>Supplied by CJdropshipping</span>
+        </div>
+      </div>
+      <div class="hero-media">
+        <img src="assets/img/hero-desk.jpg" alt="A calm desk scene with a travel tumbler, bamboo organiser and card holder" width="1392" height="752">
+        <div class="hero-badge">
+          <b>No warehouse clutter</b>
+          <span>Your order ships directly from the supplier that makes it — smaller footprint, honest pricing.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="trust" aria-label="Why shop with MORGGY">
+    <div class="container">
+      <ul>
+        <li>
+          <svg viewBox="0 0 24 24"><path d="M3 16V7h11v9M14 11h4l3 3v2h-7"/><circle cx="7" cy="18" r="1.8"/><circle cx="17.5" cy="18" r="1.8"/></svg>
+          <div><b>Tracked international delivery</b><span>Every parcel leaves the supplier with a tracking number you can follow.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div><b>Availability checked first</b><span>Supplier stock is confirmed before an order is accepted and paid.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.4 3.8 5.5 3.8 9S14.5 18.6 12 21c-2.5-2.4-3.8-5.5-3.8-9S9.5 5.4 12 3z"/></svg>
+          <div><b>Local currency estimates</b><span>Shop in S$ or RM. Orders are settled in USD at a published rate.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H8l-4 4V5a2 2 0 012-2h13a2 2 0 012 2z"/></svg>
+          <div><b>Real people on support</b><span>Email or WhatsApp, answered within one working day.</span></div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow eyebrow--ink">Featured categories</p>
+          <h2>Shop by how you live</h2>
+        </div>
+        <a class="link-arrow" href="categories.html">All categories</a>
+      </div>
+      <div class="cat-grid" id="homeCategories"></div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow eyebrow--ink">Trending now</p>
+          <h2>The pieces people ask about</h2>
+          <p>Based on enquiries and page interest, not sales volume — we only publish a best-seller list once real order data exists.</p>
+        </div>
+        <a class="link-arrow" href="shop.html">Shop all</a>
+      </div>
+      <div class="prod-grid" id="homeTrending"></div>
+    </div>
+  </section>
+
+  <!-- Best sellers: intentionally left out of the launch page. The section is
+       rendered only when the backend supplies verified order counts. -->
+
+  <section class="section section--tight" id="new">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow eyebrow--ink">New arrivals</p>
+          <h2>Recently added</h2>
+        </div>
+        <a class="link-arrow" href="shop.html?sort=newest">See what's new</a>
+      </div>
+      <div class="prod-grid" id="homeNew"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow eyebrow--ink">Why MORGGY</p>
+          <h2>A retailer built on fewer, better things</h2>
+        </div>
+      </div>
+      <div class="why-grid">
+        <div class="why-card">
+          <svg viewBox="0 0 24 24"><path d="M12 3l8 4.2v9.6L12 21l-8-4.2V7.2L12 3z"/><path d="M4 7.2l8 4.3 8-4.3M12 11.5V21"/></svg>
+          <h3>A curated catalogue</h3>
+          <p>Six categories, a short list in each. Every product is chosen for daily use rather than seasonal noise.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg>
+          <h3>No inventory, no markup pile</h3>
+          <p>We hold no stock. Orders go to the supplier that ships them, which keeps overheads — and prices — lean.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24"><path d="M4 17l6-6 4 4 6-7"/><path d="M4 21h16"/></svg>
+          <h3>Delivery priced up front</h3>
+          <p>Shipping is calculated per destination and shown in the cart before you pay. No free-delivery claim, no surprise at the end.</p>
+        </div>
+        <div class="why-card">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <h3>Delivery you can plan for</h3>
+          <p>Estimates reflect the supplier's production and transit time for your country — 5–10 working days, tracked.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight">
+    <div class="container split">
+      <div>
+        <p class="eyebrow eyebrow--ink">Shipping information</p>
+        <h2 style="margin-bottom:16px">How delivery works</h2>
+        <p class="muted" style="font-size:.93rem;max-width:46ch">Your order is passed to the supplier within one working day of cleared payment. They dispatch from their facility, and the courier carries the parcel to your address. You receive a tracking number by email as soon as it leaves.</p>
+        <p class="muted" style="font-size:.93rem;max-width:46ch;margin-top:12px">Import taxes and duties are collected by the destination customs authority and are not part of our prices. Any charge is shown by the courier before delivery.</p>
+        <a class="btn btn--ghost" href="shipping.html" style="margin-top:24px">Read the shipping policy</a>
+      </div>
+      <div class="stack" id="homeShipping"></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="newsletter">
+        <div>
+          <p class="eyebrow">Notes from MORGGY</p>
+          <h2>New stock, without the noise.</h2>
+          <p>One short email when something genuinely new lands. No daily discounts.</p>
+        </div>
+        <form data-newsletter novalidate>
+          <label class="sr-only" for="nl-email">Email address</label>
+          <input id="nl-email" name="email" type="email" placeholder="you@email.com" required>
+          <button class="btn btn--gold" type="submit">Notify me</button>
+          <p class="form-note">By subscribing you agree to our <a href="privacy.html" style="color:var(--gold)">privacy policy</a>.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

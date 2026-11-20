@@ -1,0 +1,8 @@
+[
+  { "id": "home-living", "name": "Home & Living", "blurb": "Quiet upgrades for the desk, kitchen and everyday routines.", "image": "assets/img/p-002.jpg" },
+  { "id": "electronics-accessories", "name": "Electronics Accessories", "blurb": "Charging, cables and the small things that keep devices alive.", "image": "assets/img/p-003.jpg" },
+  { "id": "travel-accessories", "name": "Travel Accessories", "blurb": "Packing, weighing and carrying — built for short-haul trips.", "image": "assets/img/p-005.jpg" },
+  { "id": "lifestyle", "name": "Lifestyle", "blurb": "Carry pieces and small daily objects with a clean, quiet look.", "image": "assets/img/p-007.jpg" },
+  { "id": "automotive-accessories", "name": "Automotive Accessories", "blurb": "Mounts and practical add-ons for cars, bikes and scooters.", "image": "assets/img/p-008.jpg" },
+  { "id": "pet-accessories", "name": "Pet Accessories", "blurb": "Grooming and care basics for small households with pets.", "image": "assets/img/p-009.jpg" }
+]

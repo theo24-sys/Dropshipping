@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Contact us | MORGGY</title>
+<meta name="description" content="Contact MORGGY about a product, an order, delivery or a return. Email, WhatsApp and business details for Morggy Technologies, Nairobi.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23102B25'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23D6A85F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-page="contact">
+<div id="site-header"></div>
+
+<main>
+  <div class="page-head">
+    <div class="container">
+      <div class="breadcrumb"><a href="index.html">Home</a><span>/</span><span>Contact</span></div>
+      <h1>Contact us</h1>
+      <p>A person in Nairobi reads every message. Most replies go out the same working day.</p>
+    </div>
+  </div>
+
+  <div class="container section section--tight">
+    <div class="contact-grid">
+      <form id="contactForm" class="form-card">
+        <h2>Send a message</h2>
+        <p class="sub">Fields marked required help us answer without a back-and-forth.</p>
+        <div class="field-row">
+          <div class="field">
+            <label for="k-name">Your name</label>
+            <input id="k-name" name="name" autocomplete="name" required>
+          </div>
+          <div class="field">
+            <label for="k-email">Email</label>
+            <input id="k-email" name="email" type="email" autocomplete="email" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="k-subject">What is this about?</label>
+          <select id="k-subject" name="subject">
+            <option>Question about a product</option>
+            <option>An existing order</option>
+            <option>Delivery or tracking</option>
+            <option>Return or refund</option>
+            <option>Wholesale or partnership</option>
+            <option>Something else</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="k-order">Order number (if you have one)</label>
+          <input id="k-order" name="order" placeholder="MOR-2026-000123">
+        </div>
+        <div class="field">
+          <label for="k-message">Message</label>
+          <textarea id="k-message" name="message" required placeholder="Tell us what you need and include any relevant details."></textarea>
+        </div>
+        <button class="btn btn--dark btn--block" type="submit">Open in email</button>
+        <p class="hint" style="margin-top:10px">This form opens your email app with the message prepared. Nothing is sent until you press send there.</p>
+        <div id="contactResult"></div>
+      </form>
+
+      <div>
+        <div class="market-card">
+          <h3>Direct contact <span>Fastest</span></h3>
+          <dl>
+            <dt>General email</dt><dd><a href="mailto:hello@morggy.com">hello@morggy.com</a></dd>
+            <dt>Orders</dt><dd><a href="mailto:orders@morggy.com">orders@morggy.com</a></dd>
+            <dt>WhatsApp</dt><dd><a href="https://wa.me/254700000000" target="_blank" rel="noopener">Message us</a></dd>
+            <dt>Hours</dt><dd>Mon–Fri, 08:00–18:00 EAT</dd>
+            <dt>Reply time</dt><dd>Within 1 working day</dd>
+          </dl>
+        </div>
+        <div class="market-card">
+          <h3>Business details <span>Legal</span></h3>
+          <dl>
+            <dt>Legal name</dt><dd>Morggy Technologies</dd>
+            <dt>Location</dt><dd>Nairobi, Kenya</dd>
+            <dt>Suppliers</dt><dd>CJdropshipping, China</dd>
+            <dt>Markets served</dt><dd>Singapore, Malaysia</dd>
+          </dl>
+          <p>MORGGY holds no local warehouse or office in Singapore or Malaysia. All orders ship directly from the supplier to the customer.</p>
+        </div>
+        <div class="market-card">
+          <h3>Before you write <span>Tip</span></h3>
+          <p style="margin-top:0">Order questions are resolved fastest with the order number and the email used at checkout. For a damaged parcel, attach photographs of the outer packaging and the item.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

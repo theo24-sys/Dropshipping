@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product | MORGGY</title>
+<meta name="description" content="Product details, variants, delivery estimates and pricing for MORGGY products.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23102B25'/%3E%3Ccircle cx='16' cy='16' r='6' fill='%23D6A85F'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body data-page="product">
+<div id="site-header"></div>
+
+<main>
+  <div class="container">
+    <div class="pdp" id="pdp"></div>
+
+    <div class="tabs" role="tablist" aria-label="Product information">
+      <button role="tab" aria-selected="true">Details</button>
+      <button role="tab" aria-selected="false" disabled style="opacity:.5">Reviews (not open)</button>
+      <button role="tab" aria-selected="false" disabled style="opacity:.5">Shipping</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div id="pdpFeatures"></div>
+      <div class="panel"><h3>Specifications</h3><div id="pdpSpecs"></div></div>
+    </div>
+
+    <div class="section-head" style="margin-top:64px">
+      <div>
+        <p class="eyebrow eyebrow--ink">You may also like</p>
+        <h2>Pairs well with</h2>
+      </div>
+      <a class="link-arrow" href="shop.html">Shop all</a>
+    </div>
+    <div class="prod-grid" id="pdpRelated"></div>
+  </div>
+</main>
+
+<div id="site-footer"></div>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
