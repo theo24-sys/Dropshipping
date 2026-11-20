@@ -9,3 +9,8 @@ node_modules/
 # Supabase local state
 supabase/.temp/
 supabase/.branches/
+
+# Wrangler build output and local state
+dist/
+node_modules/
+.dev.vars

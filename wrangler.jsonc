@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "morggy",
+  "compatibility_date": "2026-11-01",
+
+  // Static assets only: the storefront is plain HTML/CSS/JS, so `wrangler deploy`
+  // uploads ./dist and serves it from the edge. No Worker script is required.
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

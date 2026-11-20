@@ -303,6 +303,41 @@ curl -s -X POST "$SUPABASE_URL/functions/v1/place-order" \
 
 ## Deploying the storefront
 
-The static files can be served by any host (Cloudflare Pages, Netlify, S3). No
-build step, no framework and no Freebuff-specific configuration is required.
-`_headers` sets a five-minute cache for the Cloudflare variant.
+The static files can be served by any host (Cloudflare Workers, Pages, Netlify,
+S3). No framework and no build tooling beyond a copy step are required.
+
+### Cloudflare Workers (wrangler)
+
+`wrangler.jsonc` deploys the site as an assets-only Worker; `dist/` is the
+uploaded directory, and `supabase/`, tests and docs are never published.
+
+Requirements: Node 18+ and a Cloudflare account. Wrangler is not installed in
+this repository's build environment — run these on a machine with Node:
+
+```bash
+cd morggy              # this directory (contains wrangler.jsonc)
+npm install            # installs wrangler locally
+npx wrangler login     # one browser approval, stores an OAuth token
+npm run deploy         # builds dist/ and deploys the Worker
+```
+
+`npm run preview` serves the same build locally at the worker URL. `npm run
+check` runs `node --check` over the four browser scripts, which is the quickest
+way to catch a syntax error before deploying.
+
+Notes:
+
+* Work out the deployed URL (`https://morggy.<subdomain>.workers.dev`) after the
+  first run; add a custom domain from the Cloudflare dashboard if needed.
+* Workers static assets do not read a `_headers` file (that is a Pages feature),
+  so the cache header in `_headers` applies only if you deploy through Pages.
+* Fill in `assets/js/config.js` with the Supabase URL and anon key **before**
+  deploying, or the site ships in bundled-sample-data mode.
+* Never put `SUPABASE_SERVICE_ROLE_KEY`, Paystack or CJ keys in the static
+  files; they belong in Supabase secrets only.
+
+### Other hosts
+
+Any static host works: publish the same set of files (`*.html`, `assets/`,
+`data/`, `admin/`), set `index.html` as the root document, and keep the Supabase
+migrations out of the public document root.
