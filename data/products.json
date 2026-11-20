@@ -78,7 +78,7 @@
     "description": "A set of three USB-C to USB-C cables with braided nylon jackets and reinforced connectors. Rated for 60W charging and 480 Mbps data, with a velcro tie on each cable.",
     "features": ["60W charging, 480 Mbps data", "Braided nylon jacket, aluminium connectors", "0.3 m, 1 m and 1.8 m lengths", "Velcro cable ties included"],
     "images": ["assets/img/p-004.jpg"],
-    "variants": [{ "name": "Length set", "options": ["0.3 / 1 / 1.8 m"] }],
+    "variants": [],
     "priceUsd": 12.9,
     "supplier": { "name": "CJdropshipping", "productId": null, "url": null, "costUsd": 3.6, "lastSyncedAt": null, "mappingStatus": "unmapped" },
     "shippingCostUsd": { "SG": 2.7, "MY": 3.3 },

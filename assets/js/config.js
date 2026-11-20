@@ -13,12 +13,21 @@ window.MORGGY = {
     country: "Kenya",
     email: "hello@morggy.com",
     ordersEmail: "orders@morggy.com",
-    whatsapp: "254700000000",   // country code + number, digits only. Replace before launch.
-    hours: "Mon–Fri, 08:00–18:00 EAT"
+    /* Digits only, including country code (e.g. "254712345678").
+       Leave empty until the number is confirmed: the store hides every
+       WhatsApp link when this is blank, so a placeholder can never be
+       published by accident. */
+    whatsapp: "",
+    whatsappNote: "WhatsApp support is not published yet.",
+    /* EAT is UTC+3; Singapore and Malaysia are UTC+8 (+5 hours). */
+    hours: "Mon–Fri, 09:00–17:00 EAT",
+    hoursLocal: "14:00–22:00 Singapore / Malaysia time",
+    responseTime: "Within 1 working day"
   },
 
   baseCurrency: "USD",
   defaultMarket: "SG",
+  orderPrefix: "MOR",
 
   /* --- Markets -------------------------------------------------
      status: "live" accepts orders · "waitlist" shows a notice
@@ -72,13 +81,20 @@ window.MORGGY = {
     }
   },
 
-  /* --- Integrations -------------------------------------------
-     apiBase stays empty until the Django backend is deployed.
-     With no apiBase: no order is created, no payment is taken.
+  /* --- Supabase ------------------------------------------------
+     Paste the project URL and the *anon* public key here.
+     The anon key is designed to be public: Row Level Security decides what
+     it may read, and every write goes through an Edge Function. Never put the
+     service_role key in this file.
+
+     While these are empty the storefront runs on the bundled sample
+     catalogue and checkout says plainly that no order can be completed.
      ------------------------------------------------------------ */
-  apiBase: "",
+  supabase: {
+    url: "",
+    anonKey: ""
+  },
   payments: {
-    enabled: false,             // must stay false until gateway + webhook verification exist
     providers: ["paystack", "flutterwave"],
     modes: { paystack: "test", flutterwave: "test" }
   },

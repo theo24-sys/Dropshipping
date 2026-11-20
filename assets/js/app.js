@@ -23,7 +23,7 @@
     } catch (e) { return []; }
   })();
 
-  var data = { products: [], categories: [] };
+  var data = { products: [], categories: [], source: "sample" };
   var ui = { qty: 1, variant: {} };
 
   /* ---------- money ---------- */
@@ -53,13 +53,6 @@
     if (!d) return mkt().shipping.eta ? mkt().shipping.eta[0] + "–" + mkt().shipping.eta[1] + " working days" : "—";
     return d[0] + "–" + d[1] + " working days";
   }
-  function margin(p) {
-    var ship = (p.shippingCostUsd || {})[market];
-    if (ship == null) return null;
-    var profit = p.priceUsd - p.supplier.costUsd - ship;
-    return { usd: profit, pct: p.priceUsd ? (profit / p.priceUsd) * 100 : 0 };
-  }
-
   /* ---------- cart ---------- */
   function lineKey(l) { return l.id + "|" + (l.variant || ""); }
   function saveCart() {
@@ -152,7 +145,7 @@
     var head = $("#site-header");
     if (head) {
       head.innerHTML =
-        '<div class="announce">International delivery from vetted suppliers to <b>Singapore</b> &amp; <b>Malaysia</b> &middot; tracked, 5–10 working days</div>' +
+        '<div class="announce">Tracked delivery to <b>Singapore</b> &amp; <b>Malaysia</b> &middot; 5–10 working days</div>' +
         '<header class="site-head"><div class="container head-inner">' +
           '<button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">' + I.menu + "</button>" +
           '<a class="brand" href="index.html"><b>MORGGY</b><span>' + esc(C.brand.tagline) + "</span></a>" +
@@ -164,7 +157,7 @@
             '<label class="sr-only" for="marketPick">Country and currency</label>' +
             '<select class="market-select" id="marketPick">' + marketOptions() + "</select>" +
             '<button class="icon-btn" id="searchToggle" aria-label="Search products" aria-expanded="false">' + I.search + "</button>" +
-            '<a class="icon-btn" href="track.html" aria-label="Account and orders">' + I.user + "</a>" +
+            '<a class="icon-btn" href="account.html" aria-label="Your account and orders">' + I.user + "</a>" +
             '<a class="cart-btn" href="cart.html">' + I.bag + '<span class="cart-label">Cart</span>' +
               '<span class="cart-count" data-cart-count hidden>0</span></a>' +
           "</div>" +
@@ -199,7 +192,7 @@
             '<div class="foot-col"><h4>Company</h4><a href="about.html">About MORGGY</a><a href="privacy.html">Privacy policy</a>' +
               '<a href="terms.html">Terms &amp; conditions</a>' +
               '<a href="mailto:' + esc(C.brand.email) + '">' + esc(C.brand.email) + "</a>" +
-              '<a href="https://wa.me/' + esc(C.brand.whatsapp) + '" rel="noopener" target="_blank">WhatsApp support</a></div>' +
+              (C.brand.whatsapp ? '<a href="https://wa.me/' + esc(C.brand.whatsapp) + '" rel="noopener" target="_blank">WhatsApp support</a>' : "") + "</div>" +
           "</div>" +
           '<div class="foot-bottom"><span>&copy; ' + new Date().getFullYear() + " " + esc(C.brand.legalName) +
             ". All prices in USD; local currency figures are estimates.</span>" +
@@ -215,7 +208,7 @@
     return '<article class="prod-card">' +
       '<a class="prod-media" href="' + href + '">' +
         (tag ? '<span class="prod-tag' + (tagGold ? " prod-tag--gold" : "") + '">' + esc(tag) + "</span>" : "") +
-        '<img src="' + esc(p.images[0]) + '" alt="' + esc(p.name) + '" loading="lazy"></a>' +
+        		'<img src="' + esc(p.images[0]) + '" alt="' + esc(p.name) + '" width="1024" height="1024" loading="lazy" decoding="async"></a>' +
       '<div class="prod-body"><span class="prod-cat">' + esc(catName(p.category)) + "</span>" +
         '<a class="prod-name" href="' + href + '">' + esc(p.name) + "</a>" +
         '<p class="prod-desc">' + esc(p.shortDescription) + "</p>" +
@@ -233,7 +226,7 @@
     if (!host) return;
     host.innerHTML = data.categories.map(function (c) {
       return '<a class="cat-card" href="shop.html?category=' + esc(c.id) + '">' +
-        '<img src="' + esc(c.image) + '" alt="' + esc(c.name) + '" loading="lazy">' +
+        '<img src="' + esc(c.image) + '" alt="' + esc(c.name) + '" width="1024" height="1024" loading="lazy" decoding="async">' +
         '<div class="cat-card-body"><span>Browse</span><h3>' + esc(c.name) + "</h3></div></a>";
     }).join("");
   }
@@ -297,7 +290,10 @@
         '<p class="result-count" style="margin-top:12px">Prices shown in ' + esc(mkt().currency) + "</p>";
     }
     var count = $("#resultCount");
-    if (count) count.textContent = list.length + (list.length === 1 ? " product" : " products") + (q ? ' for “' + q + "”" : "");
+    if (count) {
+      count.textContent = list.length + (list.length === 1 ? " product" : " products") + (q ? ' for “' + q + "”" : "");
+      if (data.source === "sample") count.textContent += " · bundled sample data, not the live catalogue";
+    }
     host.innerHTML = list.length ? grid(list) :
       '<div class="empty" style="grid-column:1/-1"><h3>Nothing matched that search</h3>' +
       "<p>Try a different word, or browse all products.</p><a class=\"btn btn--dark\" href=\"shop.html\">View all products</a></div>";
@@ -309,8 +305,8 @@
     host.innerHTML = data.categories.map(function (c) {
       var count = data.products.filter(function (p) { return p.category === c.id; }).length;
       return '<div><a class="cat-card" href="shop.html?category=' + esc(c.id) + '">' +
-        '<img src="' + esc(c.image) + '" alt="' + esc(c.name) + '" loading="lazy">' +
-        '<span class="cat-card-body"><span>' + count + " products</span><h3>" + esc(c.name) + "</h3></span></a>" +
+        '<img src="' + esc(c.image) + '" alt="' + esc(c.name) + '" width="1024" height="1024" loading="lazy" decoding="async">' +
+        '<div class="cat-card-body"><span>' + count + " products</span><h3>" + esc(c.name) + "</h3></div></a>" +
         '<p class="muted" style="font-size:.85rem;margin-top:10px">' + esc(c.blurb) + "</p></div>";
     }).join("");
   }
@@ -319,16 +315,23 @@
     var host = $("#pdp");
     if (!host) return;
     var slug = new URLSearchParams(location.search).get("p");
-    var p = productBySlug(slug) || data.products[0];
-    if (!p) return;
+    var p = productBySlug(slug);
+    if (!p) {
+      document.title = "Product not found | MORGGY";
+      host.innerHTML = '<div class="empty" style="grid-column:1/-1"><h3>We cannot find that product</h3>' +
+        "<p>The link may be out of date, or the product has been withdrawn.</p>" +
+        '<a class="btn btn--dark" href="shop.html">Browse all products</a></div>';
+      return;
+    }
     var variants = (p.variants || [])[0];
     if (variants && !ui.variant[variants.name]) ui.variant[variants.name] = variants.options[0];
     var vstring = variants ? ui.variant[variants.name] : "";
-    var ship = (p.shippingCostUsd || {})[market];
+    /* What the cart actually charges for this market — not the supplier's cost. */
+    var ship = mkt().shipping.flat;
     document.title = p.name + " | MORGGY";
 
     host.innerHTML =
-      '<div class="pdp-media"><img src="' + esc(p.images[0]) + '" alt="' + esc(p.name) + '"></div>' +
+      '<div class="pdp-media"><img src="' + esc(p.images[0]) + '" alt="' + esc(p.name) + '" width="1024" height="1024" fetchpriority="high"></div>' +
       "<div>" +
         '<div class="breadcrumb"><a href="index.html">Home</a><span>/</span><a href="shop.html">Shop</a><span>/</span>' +
           '<a href="shop.html?category=' + esc(p.category) + '">' + esc(catName(p.category)) + "</a></div>" +
@@ -344,11 +347,11 @@
               (o === vstring ? "true" : "false") + '">' + esc(o) + "</button>";
           }).join("") + "</div></div>" : "") +
         '<div class="buy-row"><div class="qty"><button data-qd="-1" aria-label="Decrease quantity">−</button>' +
-          "<span id=" + '"pdpQty"' + ">" + ui.qty + '</span><button data-qd="1" aria-label="Increase quantity">+</button></div>' +
+          '<span id="pdpQty">' + ui.qty + '</span><button data-qd="1" aria-label="Increase quantity">+</button></div>' +
           '<button class="btn btn--gold" id="pdpAdd">Add to cart</button></div>' +
         '<div class="pdp-notes">' +
           "<div>" + I.truck + "<span>Delivery to " + esc(mkt().name) + ": " + esc(etaText(p)) +
-            (ship != null ? " &middot; shipping " + localPrice(ship) : "") + "</span></div>" +
+            (ship != null ? " &middot; shipping " + localPrice(ship) + " first item" : "") + "</span></div>" +
           "<div>" + I.shield + "<span>Supplier stock and dispatch are confirmed before your order is accepted.</span></div>" +
           "<div>" + I.globe + "<span>Imported from a vetted overseas supplier. Import taxes, if any, are payable on delivery.</span></div>" +
         "</div>" +
@@ -361,7 +364,9 @@
         "<tr><th>Category</th><td>" + esc(catName(p.category)) + "</td></tr>" +
         "<tr><th>Weight</th><td>" + p.weightKg + " kg</td></tr>" +
         "<tr><th>Dimensions</th><td>" + p.dimensionsCm.length + " × " + p.dimensionsCm.width + " × " + p.dimensionsCm.height + " cm</td></tr>" +
-        "<tr><th>Shipping to " + esc(mkt().name) + "</th><td>" + (ship != null ? localPrice(ship) + " (" + usd(ship) + " USD)" : "Unavailable") + "</td></tr>" +
+        "<tr><th>Shipping to " + esc(mkt().name) + "</th><td>" + (ship != null
+          ? localPrice(ship) + " first item, " + localPrice(mkt().shipping.perAdditionalItem) + " each additional"
+          : "Unavailable") + "</td></tr>" +
         "<tr><th>Estimated delivery</th><td>" + esc(etaText(p)) + "</td></tr>" +
         "<tr><th>Supplier</th><td>" + esc(p.supplier.name) + (p.supplier.mappingStatus === "unmapped" ? " (mapping pending)" : "") + "</td></tr>" +
         "<tr><th>Availability</th><td>" + (p.availability === "unverified" ? "Confirmed with supplier at order time" : esc(p.availability)) + "</td></tr>" +
@@ -373,9 +378,9 @@
 
     var related = $("#pdpRelated");
     if (related) {
-      related.innerHTML = grid(data.products.filter(function (x) {
-        return x.category === p.category && x.id !== p.id;
-      }).slice(0, 4).concat(data.products.filter(function (x) { return x.category !== p.category; }).slice(0, 2)));
+      var sameCat = data.products.filter(function (x) { return x.category === p.category && x.id !== p.id; });
+      var rest = data.products.filter(function (x) { return x.category !== p.category; });
+      related.innerHTML = grid(sameCat.concat(rest).slice(0, 4));
     }
 
     var add = $("#pdpAdd");
@@ -408,7 +413,7 @@
     }
     host.innerHTML = L.map(function (l) {
       var v = l.variant ? '<span class="meta">' + esc(l.variant) + "</span>" : "";
-      return '<div class="cart-item"><img src="' + esc(l.p.images[0]) + '" alt="' + esc(l.p.name) + '">' +
+      return '<div class="cart-item"><img src="' + esc(l.p.images[0]) + '" alt="' + esc(l.p.name) + '" width="104" height="104" loading="lazy">' +
         "<div><h3>" + esc(l.p.name) + "</h3>" + v +
         '<p class="meta">' + esc(l.p.sku) + " &middot; ships in " + esc(etaText(l.p)) + "</p>" +
         '<div class="qty"><button data-qty="' + esc(l.key) + '" data-delta="-1" aria-label="Decrease quantity">−</button>' +
@@ -513,48 +518,58 @@
     var summary = $("#checkoutSummary");
     if (summary) summary.innerHTML = summaryHTML();
 
+    /* Stable for this page view, so retrying a slow submit cannot create two orders. */
+    var idemKey = window.Store && Store.configured ? Store.idempotencyKey() : "";
+
     $("#coForm").onsubmit = function (e) {
       e.preventDefault();
       var form = e.target, out = $("#payResult");
       if (!form.checkValidity()) { form.reportValidity(); return; }
       var fd = new FormData(form);
-      var payload = {
-        market: market,
-        displayCurrency: m.currency,
-        chargeCurrency: C.baseCurrency,
-        customer: { name: fd.get("name"), email: fd.get("email"), phone: fd.get("phone") },
-        address: {
-          line1: fd.get("line1"), line2: fd.get("line2") || "",
-          city: fd.get("city") || "", postcode: fd.get("postalCode"), state: fd.get("state") || ""
-        },
-        items: lines().map(function (l) {
-          return { productId: l.p.id, sku: l.p.sku, variant: l.variant, qty: l.qty, unitPriceUsd: l.p.priceUsd };
-        }),
-        totals: { subtotalUsd: subtotal(), shippingUsd: shippingUsd(), totalUsd: subtotal() + shippingUsd() }
-      };
+      var emailValue = String(fd.get("email") || "").trim();
 
-      /* No backend or no verified gateway: never claim an order was placed. */
-      if (!C.apiBase || !C.payments.enabled) {
+      if (!window.Store || !Store.configured) {
         out.innerHTML = '<div class="notice"><strong>No order was placed</strong>' +
-          "Live payments are not connected yet, so nothing was charged and nothing was sent to a supplier. " +
+          "This storefront is not connected to an order database, so nothing was charged and nothing was sent to a supplier. " +
           'To have us hold these items, email <a href="mailto:' + esc(C.brand.ordersEmail) + '">' +
           esc(C.brand.ordersEmail) + "</a> with your delivery country.";
         return;
       }
 
-      out.innerHTML = '<div class="notice">Confirming supplier availability and creating your payment…</div>';
-      fetch(C.apiBase + "/orders", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        if (j && j.paymentUrl) { location.href = j.paymentUrl; return; }
-        if (j && j.unavailable && j.unavailable.length) {
-          out.innerHTML = '<div class="notice"><strong>Unavailable at the supplier</strong>' +
-            esc(j.unavailable.join(", ")) + " — nothing has been charged.";
-          return;
-        }
-        out.innerHTML = '<div class="notice"><strong>Order not created</strong>Please try again or contact us.</div>';
-      }).catch(function () {
-        out.innerHTML = '<div class="notice"><strong>Connection problem</strong>No payment was taken. Please try again.</div>';
+      out.innerHTML = '<div class="notice">Creating your order…</div>';
+
+      /* Totals are recomputed on the server; nothing price-related is trusted
+         from this page. */
+      Store.placeOrder({
+        market: market,
+        customer: { name: fd.get("name"), email: emailValue, phone: fd.get("phone") },
+        address: {
+          line1: fd.get("line1"), line2: fd.get("line2") || "",
+          city: fd.get("city") || "", postcode: fd.get("postalCode"), state: fd.get("state") || ""
+        },
+        items: lines().map(function (l) {
+          return { productId: l.p.id, quantity: l.qty, variantLabel: l.variant };
+        }),
+        idempotencyKey: idemKey
+      }).then(function (order) {
+        out.innerHTML = '<div class="notice">Order ' + esc(order.orderNumber) + " created. Opening the payment page…</div>";
+        return Store.initiatePayment({ orderNumber: order.orderNumber, email: emailValue })
+          .then(function (payment) {
+            out.innerHTML = '<div class="notice"><strong>Taking you to payment</strong>Order ' +
+              esc(order.orderNumber) + " · " + localPrice(order.totals.totalUsd) +
+              ". You will come back to this site afterwards.</div>";
+            window.location.href = payment.authorizationUrl;
+          })
+          .catch(function (err) {
+            out.innerHTML = '<div class="notice"><strong>Order saved, payment not started</strong>' +
+              "Order " + esc(order.orderNumber) + " is held for you, but " +
+              esc(err.message || "the payment page could not open.") +
+              " Nothing has been charged. Email <a href=\"mailto:" + esc(C.brand.ordersEmail) + "\">" +
+              esc(C.brand.ordersEmail) + "</a> and we will send a payment link.";
+          });
+      }).catch(function (err) {
+        out.innerHTML = '<div class="notice"><strong>No order was placed</strong>' +
+          esc(err.message || "That request could not be completed.") + " Nothing has been charged.";
       });
     };
   }
@@ -566,20 +581,37 @@
       e.preventDefault();
       var out = $("#trackResult");
       var fd = new FormData(form);
-      if (!C.apiBase) {
+      var orderNumber = String(fd.get("order") || "").trim();
+      var email = String(fd.get("email") || "").trim();
+
+      if (!window.Store || !Store.configured) {
         out.innerHTML = '<div class="notice"><strong>Tracking is not connected yet</strong>' +
-          "Order lookups become available once the backend is live. If you already ordered, email " +
+          "Order lookups become available once the order database is connected. If you already ordered, email " +
           '<a href="mailto:' + esc(C.brand.ordersEmail) + '">' + esc(C.brand.ordersEmail) + "</a> with your order number and we will send the latest courier status.</div>";
         return;
       }
+
       out.innerHTML = '<div class="notice">Looking up order…</div>';
-      fetch(C.apiBase + "/track", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber: fd.get("order"), email: fd.get("email") })
-      }).then(function (r) { return r.json(); }).then(function (j) {
-        out.innerHTML = '<div class="notice"><strong>Order ' + esc(fd.get("order")) + "</strong>Status: " + esc(j.status || "unknown") + "</div>";
-      }).catch(function () {
-        out.innerHTML = '<div class="notice"><strong>Lookup failed</strong>Please try again or contact us.</div>';
+      Store.trackOrder(orderNumber, email).then(function (order) {
+        var shipments = order.shipments || [];
+        var tracking = shipments.map(function (s) {
+          if (!s.trackingNumber) return "No tracking number yet";
+          var label = "Tracking " + esc(s.trackingNumber);
+          return s.trackingUrl
+            ? '<a href="' + esc(s.trackingUrl) + '" target="_blank" rel="noopener">' + label + "</a>"
+            : label;
+        }).join(", ");
+
+        out.innerHTML = '<div class="notice"><strong>Order ' + esc(order.orderNumber) + " — " +
+          esc(order.statusLabel || order.status) + "</strong>" +
+          "Placed " + esc(new Date(order.placedAt).toLocaleDateString()) +
+          " · " + localPrice(Number(order.totals.totalUsd)) + " (" +
+          usd(Number(order.totals.totalUsd)) + " USD)" +
+          "<br>" + (shipments.length ? tracking : esc(order.note || "")) + "</div>";
+      }).catch(function (err) {
+        out.innerHTML = '<div class="notice"><strong>No match</strong>' +
+          esc(err.message || "We could not find an order with those details.") +
+          " Check the order number and use the email address given at checkout.</div>";
       });
     };
   }
@@ -590,7 +622,9 @@
     form.onsubmit = function (e) {
       e.preventDefault();
       var fd = new FormData(form);
-      var body = "Name: " + fd.get("name") + "\nEmail: " + fd.get("email") + "\n\n" + fd.get("message");
+      var order = String(fd.get("order") || "").trim();
+      var body = "Name: " + fd.get("name") + "\nEmail: " + fd.get("email") +
+        (order ? "\nOrder number: " + order : "") + "\n\n" + fd.get("message");
       location.href = "mailto:" + C.brand.email + "?subject=" + encodeURIComponent(fd.get("subject") || "Website enquiry") +
         "&body=" + encodeURIComponent(body);
       var out = $("#contactResult");
@@ -673,24 +707,67 @@
       }
     });
 
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      ["#mobilePanel", "#searchPanel"].forEach(function (sel) {
+        var panel = $(sel);
+        if (!panel || !panel.classList.contains("is-open")) return;
+        panel.classList.remove("is-open");
+        var trigger = $(sel === "#mobilePanel" ? "#navToggle" : "#searchToggle");
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+      });
+    });
+
     var sort = $("#shopSort");
     if (sort) sort.onchange = renderPage;
+  }
+
+  /* Live FX rates from the database replace the baked-in estimates. */
+  function applyRates(rates) {
+    if (!rates) return;
+    var today = new Date().toISOString().slice(0, 10);
+    Object.keys(C.markets).forEach(function (code) {
+      var rate = rates[C.markets[code].currency];
+      if (rate && rate > 0) {
+        C.markets[code].fx = rate;
+        C.markets[code].fxUpdatedAt = today;
+      }
+    });
   }
 
   /* ---------- boot ---------- */
   async function boot() {
     renderChrome();
     bindGlobal();
-    try {
-      var res = await Promise.all([
-        fetch("data/products.json").then(function (r) { return r.json(); }),
-        fetch("data/categories.json").then(function (r) { return r.json(); })
-      ]);
-      data.products = res[0].filter(function (p) { return p.status === "active"; });
-      data.categories = res[1];
-    } catch (err) {
-      console.error("Catalogue failed to load", err);
+
+    var remote = null;
+    if (window.Store && window.Store.configured) {
+      try {
+        remote = await Store.loadCatalogue();
+      } catch (err) {
+        console.error("Catalogue database unavailable; falling back to bundled sample data", err);
+      }
     }
+
+    if (remote && remote.products) {
+      data.products = remote.products.filter(function (p) { return p.status === "published"; });
+      data.categories = remote.categories || [];
+      data.source = "database";
+      applyRates(remote.rates);
+    } else {
+      try {
+        var res = await Promise.all([
+          fetch("data/products.json").then(function (r) { return r.json(); }),
+          fetch("data/categories.json").then(function (r) { return r.json(); })
+        ]);
+        data.products = res[0].filter(function (p) { return p.status === "active"; });
+        data.categories = res[1];
+        data.source = "sample";
+      } catch (err) {
+        console.error("Catalogue failed to load", err);
+      }
+    }
+
     renderPage();
     bindNewsletter();
     var badge = $("#catalogueCount");

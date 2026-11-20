@@ -1,0 +1,60 @@
+# MORGGY Supabase project configuration.
+# `supabase start` / `supabase functions serve` read this file.
+
+project_id = "morggy"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:8123"
+additional_redirect_urls = ["http://localhost:8123", "http://127.0.0.1:8123"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+
+[functions.place-order]
+# Guest checkout: the function reads the bearer token if present, but does not
+# require one.
+verify_jwt = false
+
+[functions.initiate-payment]
+verify_jwt = false
+
+[functions.track-order]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
+
+[functions.flutterwave-webhook]
+verify_jwt = false
+
+[functions.verify-payment]
+verify_jwt = true
+
+[functions.process-refund]
+verify_jwt = true
+
+[functions.cj-sync]
+verify_jwt = true
