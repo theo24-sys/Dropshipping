@@ -13,8 +13,10 @@
   };
   var keyMarket = "morggy:market", keyCart = "morggy:cart";
 
-  var market = localStorage.getItem(keyMarket);
-  if (!C.markets[market]) market = C.defaultMarket;
+  var market;
+  try { market = localStorage.getItem(keyMarket); } catch (e) { market = null; }
+  if (!C.markets[market] || C.markets[market].status !== "live") market = C.defaultMarket;
+  document.documentElement.setAttribute("data-market", market);
 
   var cart = (function () {
     try {
@@ -134,7 +136,7 @@
 
   /* ---------- chrome ---------- */
   function marketOptions() {
-    return Object.keys(C.markets).map(function (k) {
+    return ["SG", "MY"].map(function (k) {
       var m = C.markets[k];
       return '<option value="' + k + '"' + (k === market ? " selected" : "") + ">" +
         esc(m.name) + (m.status === "live" ? " · " + m.currency : " · coming soon") + "</option>";
@@ -145,7 +147,7 @@
     var head = $("#site-header");
     if (head) {
       head.innerHTML =
-        '<div class="announce">Delivery to <b>Singapore</b> &amp; <b>Malaysia</b> &middot; Estimated 5–10 working days</div>' +
+        '<div class="announce">Everyday finds, delivered to Singapore and Malaysia.</div>' +
         '<header class="site-head"><div class="container head-inner">' +
           '<button class="icon-btn nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false">' + I.menu + "</button>" +
           '<a class="brand" href="index.html"><b>MORGGY</b><span>' + esc(C.brand.tagline) + "</span></a>" +
@@ -154,7 +156,7 @@
             '<a href="about.html">About</a><a href="track.html">Track order</a><a href="contact.html">Contact</a>' +
           "</nav>" +
           '<div class="head-actions">' +
-            '<label class="sr-only" for="marketPick">Country and currency</label>' +
+            '<label class="market-label" for="marketPick">Delivering to:</label>' +
             '<select class="market-select" id="marketPick">' + marketOptions() + "</select>" +
             '<button class="icon-btn" id="searchToggle" aria-label="Search products" aria-expanded="false">' + I.search + "</button>" +
             '<a class="icon-btn" href="account.html" aria-label="Your account and orders">' + I.user + "</a>" +
@@ -170,7 +172,7 @@
           '<div class="container">' +
             '<a href="shop.html">Shop all</a><a href="categories.html">Categories</a><a href="about.html">About MORGGY</a>' +
             '<a href="track.html">Track order</a><a href="faq.html">FAQ</a><a href="contact.html">Contact</a>' +
-            '<label class="sr-only" for="marketPickMobile">Country and currency</label>' +
+            '<label class="market-label" for="marketPickMobile">Delivering to:</label>' +
             '<select class="market-select" id="marketPickMobile">' + marketOptions() + "</select>" +
           "</div>" +
         "</div></header>";
@@ -184,7 +186,7 @@
             '<div><a class="brand" href="index.html"><b>MORGGY</b><span>' + esc(C.brand.tagline) + "</span></a>" +
               '<p class="foot-about">MORGGY is an international online store operated by ' + esc(C.brand.legalName) +
               ", " + esc(C.brand.city) + ", " + esc(C.brand.country) +
-              ". We work with vetted overseas suppliers who ship directly to customers in Singapore and Malaysia.</p></div>" +
+              ". We offer everyday finds for customers in Singapore and Malaysia.</p></div>" +
             '<div class="foot-col"><h4>Shop</h4><a href="shop.html">Shop all</a><a href="categories.html">Categories</a>' +
               '<a href="shop.html#new">New arrivals</a><a href="cart.html">Your cart</a></div>' +
             '<div class="foot-col"><h4>Help</h4><a href="track.html">Track an order</a><a href="faq.html">FAQ</a>' +
@@ -249,11 +251,7 @@
         var m = C.markets[k];
         if (m.status !== "live") return "";
         return '<div class="market-card"><h3>' + esc(m.name) + " <span>" + esc(m.currency) + "</span></h3>" +
-          "<dl><dt>Est. delivery</dt><dd>" + m.shipping.eta[0] + "–" + m.shipping.eta[1] + " working days</dd>" +
-          "<dt>Est. shipping</dt><dd>" + m.symbol + m.shipping.flat.toFixed(2) + " first item (indicative rate)</dd>" +
-          "<dt>Additional item</dt><dd>" + m.symbol + m.shipping.perAdditionalItem.toFixed(2) + "</dd>" +
-          "<dt>Carrier</dt><dd>International parcel (tracking provided when issued)</dd></dl>" +
-          "<p>" + esc(m.taxNote) + "</p></div>";
+          "<p>Delivery timing, charges, tracking availability and import-charge treatment are to be confirmed. [Owner to confirm]</p></div>";
       }).join("");
     }
   }
@@ -440,11 +438,12 @@
   }
 
   function addressFieldsHTML(m) {
+    var singapore = market === "SG";
     var f = {
-      line1: { label: "Address line 1", ph: "Street, building" },
-      line2: { label: "Address line 2 (optional)", ph: "Unit, floor, landmark", optional: true },
+      line1: { label: singapore ? "Block / Street" : "Address line 1", ph: singapore ? "Block and street" : "Street, building" },
+      line2: { label: singapore ? "Unit number" : "Address line 2 (optional)", ph: singapore ? "Unit number" : "Unit, floor, landmark", optional: !singapore },
       city: { label: "City", ph: "City" },
-      postalCode: { label: "Postcode", ph: m.postalExample },
+      postalCode: { label: singapore ? "Postal code (6 digits)" : "Postcode (5 digits)", ph: m.postalExample, pattern: singapore ? "[0-9]{6}" : "[0-9]{5}" },
       state: { label: "State", select: m.states || [] }
     };
     return m.addressFields.map(function (k) {
@@ -455,7 +454,8 @@
           d.select.map(function (s) { return "<option>" + esc(s) + "</option>"; }).join("") + "</select></div>";
       }
       return '<div class="field"><label for="f-' + k + '">' + d.label + '</label><input id="f-' + k + '" name="' + k + '" ' +
-        'placeholder="' + esc(d.ph) + '" ' + (d.optional ? "" : "required") + "></div>";
+        'placeholder="' + esc(d.ph) + '" ' + (d.pattern ? 'pattern="' + d.pattern + '" inputmode="numeric" ' : "") +
+        (d.optional ? "" : "required") + "></div>";
     }).join("");
   }
 
@@ -685,7 +685,8 @@
     document.addEventListener("change", function (e) {
       if (e.target.matches(".market-select")) {
         market = e.target.value;
-        localStorage.setItem(keyMarket, market);
+        document.documentElement.setAttribute("data-market", market);
+        try { localStorage.setItem(keyMarket, market); } catch (e) {}
         renderChrome();
         renderPage();
       }

@@ -7,7 +7,7 @@
 window.MORGGY = {
   brand: {
     name: "MORGGY",
-    tagline: "Discover more. Live better.",
+    tagline: "Everyday finds, delivered to Singapore and Malaysia.",
     legalName: "Morggy Technologies",
     city: "Nairobi",
     country: "Kenya",
